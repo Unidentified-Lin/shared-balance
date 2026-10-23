@@ -11,9 +11,29 @@
 - 無法同時滿足最低保留金額與支出時不產生虛假分配，顯示缺口。收入均為零且沒有支出時收入比例顯示 50:50 作為中性預設。
 - 主滑桿始終調整原始計畫，加薪結果以差額及對比比例呈現；「依收入分配」會持續跟隨收入，手動拖動後改為自訂比例。
 
-驗證：`node model.test.cjs`。計算模型與畫面分離，測試涵蓋分攤加總、個人最低保留金額、零收入與不可行條件。
+驗證：安裝 Node.js 後執行 `npm test`，不需要先執行 `npm install`（沒有套件依賴）。也可分別執行 `node model.test.cjs` 與 `node settings.test.cjs`。測試涵蓋分攤加總、個人最低保留金額、零收入、不可行條件、加薪保留，以及設定檔格式驗證。
 
 
 匯出設定：右上角「匯出設定」下載 UTF-8 JSON，包含 schemaVersion、exportedAt（UTC）、currency（TWD）、period（monthly）與完整 settings。包含姓名、收入、最低保留金額及啟用狀態、原始分攤設定（ratio=null 表示跟隨收入）、支出明細、加薪與模擬設定。檔名使用本機時間。只匯出設定，不匯出推導結果；可使用「匯入設定」還原至其他裝置：選擇 JSON（最大 5 MB），檢視摘要並確認取代。驗證格式版本、所有欄位型別與金額範圍；錯誤、取消或無法儲存時維持目前設定。匯入取代所有設定，不合併支出項目。檔案由瀏覽器直接產生，不傳送到伺服器。
 
-專案根目錄：C:\91APP\shared-balance。為保留既有資料，沿用 localStorage 的 together-budget-v1 鍵與原線上網址。
+為保留既有資料，沿用 localStorage 的 `together-budget-v1` 鍵。更換網域或裝置時，請透過匯出／匯入轉移設定。
+
+## 專案結構
+
+```text
+dist/                 手寫的網站原始碼，同時也是直接部署目錄
+  index.html          單頁結構
+  style.css           響應式樣式
+  app.js              畫面互動、儲存與檔案匯入匯出
+  model.js            分攤與加薪計算
+  settings.js         匯入設定的驗證
+model.test.cjs        計算模型測試
+settings.test.cjs     設定驗證測試
+.openai/hosting.json  既有 ChatGPT Sites 的部署識別與設定
+```
+
+## 部署
+
+無建置步驟，將 `dist/` 的內容部署至任何靜態網站服務即可，網站入口為 `index.html`。`dist/` 是原始碼，應納入版本控制，不可視為可刪除的建置產物。`.openai/hosting.json` 不含認證密鑰；一般靜態服務不使用此檔案，透過 Sites 發布時才會使用現有網站識別。
+
+瀏覽器測試產物、部署壓縮檔及使用者匯出的設定檔均已忽略。不要將個人收入／支出備份或登入憑證提交至 repo。

@@ -1,0 +1,9 @@
+{
+  "name": "shared-balance",
+  "version": "1.0.0",
+  "private": true,
+  "description": "一起有餘：雙人家庭分攤與加薪模擬工具",
+  "scripts": {
+    "test": "node model.test.cjs && node settings.test.cjs"
+  }
+}

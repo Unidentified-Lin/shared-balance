@@ -1,3 +1,10 @@
 .playwright-mcp/
 *-site.zip
 *-site.tar.gz
+node_modules/
+.env
+.env.*
+!.env.example
+shared-balance-settings*.json
+.DS_Store
+Thumbs.db
