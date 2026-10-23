@@ -1,5 +1,5 @@
 const $ = id => document.getElementById(id);
-const defaults = () => ({ names: ['夥伴 A', '夥伴 B'], incomes: [60000, 45000], raises: [5000, 3000], minimums: [20000, 20000], enabled: [true, true], ratio: null, simulate: false, mode: 'income', items: [{name:'房租 / 房貸',amount:18000},{name:'日常伙食',amount:10000},{name:'水電瓦斯',amount:2500},{name:'網路與通訊',amount:1500},{name:'生活用品',amount:3000}] });
+const defaults = () => ({ names: ['夥伴 A', '夥伴 B'], incomes: [60000, 45000], raises: [5000, 3000], minimums: [20000, 20000], enabled: [true, true], ratio: null, simulate: false, mode: 'income', retention: [40,40], items: [{name:'房租 / 房貸',amount:18000},{name:'日常伙食',amount:10000},{name:'水電瓦斯',amount:2500},{name:'網路與通訊',amount:1500},{name:'生活用品',amount:3000}] });
 const KEY = 'together-budget-v1';
 let state = defaults(), storageAvailable = true;
 try {
@@ -11,9 +11,10 @@ try {
     state.enabled = state.enabled.map(Boolean);
     state.ratio = state.ratio == null ? null : Math.max(0,Math.min(100,Number(state.ratio)||0));
     state.simulate = !!state.simulate;
-    state.mode = state.mode === 'fixed' ? 'fixed' : 'income';
+    state.mode = ['fixed','retain'].includes(state.mode) ? state.mode : 'income';
   }
 } catch { storageAvailable = false; }
+state.retention = Array.isArray(state.retention) && state.retention.length === 2 ? state.retention.map(Budget.percent) : [40,40];
 const fmt = n => Math.round(n).toLocaleString('zh-TW');
 const pct = n => Number(n.toFixed(2)).toString();
 let base, future;
@@ -40,6 +41,7 @@ function syncInputs() {
     $('name'+i).value = state.names[i];
     $('income'+i).value = state.incomes[i]; $('raise'+i).value = state.raises[i];
     $('min'+i).value = state.minimums[i]; $('enableMin'+i).checked = state.enabled[i];
+    $('retention'+i).value = (state.retention || [40,40])[i];
   }
   $('simulate').checked = state.simulate; $('scenarioMode').value = state.mode;
 }
@@ -48,7 +50,9 @@ function render() {
   const minimums = state.minimums.map((v,i)=>state.enabled[i]?v:0);
   base = Budget.calculate(state.incomes,minimums,total,state.ratio);
   const raised = state.incomes.map((v,i)=>v+(state.simulate?state.raises[i]:0));
-  future = Budget.calculate(raised,minimums,total,state.mode==='income'?null:base.ratio);
+  future = Budget.simulate(state.incomes,minimums,total,base,state.simulate ? state.raises : [0,0],state.mode,state.retention);
+  const retaining = state.simulate && state.mode === 'retain';
+  document.body.classList.toggle('retain-mode',retaining);
   const active = state.simulate ? future : base;
   $('total').textContent = fmt(total); $('itemCount').textContent = state.items.length;
   $('dialogTotal').textContent = 'NT$ ' + fmt(total);
@@ -61,6 +65,8 @@ function render() {
   stripe.style.width = (state.simulate?Math.abs(future.incomeRatio-base.incomeRatio):0)+'%';
   const max = Math.max(1,...raised,...state.incomes);
   for(let i=0;i<2;i++) {
+    $('retentionField'+i).hidden = !retaining;
+    $('retentionNote'+i).textContent = !base.feasible ? '先讓原始計畫符合生活費底線' : '至少多留 '+fmt(future.guaranteed?.[i] || 0)+' 元給自己';
     $('min'+i).disabled = !state.enabled[i];
     $('incomeViz'+i).innerHTML = '<span></span><i></i>';
     $('incomeViz'+i).firstElementChild.style.width = state.incomes[i]/max*100+'%';
@@ -88,7 +94,8 @@ function render() {
   $('extraTotal').textContent = '＋'+fmt(state.simulate?state.raises[0]+state.raises[1]:0)+' 元';
   $('scenarioMode').disabled=!state.simulate;
   $('scenarioNote').classList.toggle('error',state.simulate&&!future.feasible);
-  $('scenarioNote').textContent = !state.simulate ? '開啟加薪模擬，數字將以「原金額 ＋／− 差額」呈現；加薪不會覆蓋原始收入。' : !future.feasible ? '加薪後仍無法分攤：'+problem(future) : '加薪後分攤 '+pct(future.ratio)+'% / '+pct(100-future.ratio)+'%（'+(state.mode==='income'?'依新收入重算':'維持原分攤比例')+'）'+(future.adjusted?'，已依最低生活費調整。':'。')+'上方拖桿調整原始計畫；加薪結果以差額呈現。';
+  const modeLabel = {income:'依新收入重算',fixed:'維持原分攤比例',retain:'加薪保留比例'}[state.mode];
+  $('scenarioNote').textContent = !state.simulate ? '開啟加薪模擬，數字將以「原金額 ＋／− 差額」呈現；加薪不會覆蓋原始收入。' : future.reason === 'no_baseline' ? '原始計畫無可行分配，無法計算加薪保留基準。請先調整原始收入、支出或最低生活費；也可切換其他模擬模式。' : !future.feasible ? '加薪後仍無法分攤：'+problem(future) : '加薪後分攤 '+pct(future.ratio)+'% / '+pct(100-future.ratio)+'%（'+modeLabel+'）'+(retaining ? '。先保障原結餘＋約定加薪，再依新收入分配；實際保留可更多。' : (future.adjusted?'，已依最低生活費調整。':'。')+'上方拖桿調整原始計畫；加薪結果以差額呈現。');
   save();
 }
 function problem(result) {
@@ -101,6 +108,8 @@ function setRatio(value) {
   state.ratio = Math.max(base.low,Math.min(base.high,Number(value)||0)); render();
 }
 for(let i=0;i<2;i++) {
+  $('retention'+i).addEventListener('input',e=>{state.retention[i]=Budget.percent(e.target.value);render()});
+  $('retention'+i).addEventListener('change',e=>{e.target.value=state.retention[i]});
   $('name'+i).addEventListener('input',e=>{state.names[i]=e.target.value;render()});
   [['income','incomes'],['raise','raises'],['min','minimums']].forEach(([id,key])=>{
     $(id+i).addEventListener('input',e=>{state[key][i]=Budget.money(e.target.value);render()});
