@@ -66,7 +66,7 @@ function render() {
   const max = Math.max(1,...raised,...state.incomes);
   for(let i=0;i<2;i++) {
     $('retentionField'+i).hidden = !retaining;
-    $('retentionNote'+i).textContent = !base.feasible ? '先讓原始計畫符合生活費底線' : '至少多留 '+fmt(future.guaranteed?.[i] || 0)+' 元給自己';
+    $('retentionNote'+i).textContent = !base.feasible ? '先讓原始計畫符合保留金額底線' : '至少多留 '+fmt(future.guaranteed?.[i] || 0)+' 元給自己';
     $('min'+i).disabled = !state.enabled[i];
     $('incomeViz'+i).innerHTML = '<span></span><i></i>';
     $('incomeViz'+i).firstElementChild.style.width = state.incomes[i]/max*100+'%';
@@ -75,7 +75,7 @@ function render() {
     compared($('expense'+i),base.expenses[i],future.expenses[i]);
     compared($('remaining'+i),base.remaining[i],future.remaining[i]);
     const remain = active.remaining[i];
-    $('remainNote'+i).textContent = remain == null ? '目前無法滿足生活費條件' : state.enabled[i] ? '高於生活費底線 '+fmt(remain-minimums[i])+' 元' : '收入扣除家庭分攤後的金額';
+    $('remainNote'+i).textContent = remain == null ? '目前無法滿足最低保留金額條件' : state.enabled[i] ? '高於保留金額底線 '+fmt(remain-minimums[i])+' 元' : '收入扣除家庭分攤後的金額';
   }
   // The controls always edit the original plan. The simulation is an explicit comparison.
   $('ratioA').value = pct(base.ratio); $('ratioB').value = pct(100-base.ratio);
@@ -87,7 +87,7 @@ function render() {
   let text;
   if (!base.feasible) text = problem(base);
   else if (!total) text = '尚無家庭支出；新增明細後即可調整比例。';
-  else text = '⌑ A 可分攤 '+pct(lo)+'% – '+pct(hi)+'%'+(base.adjusted?' · 已依生活費底線限制比例':' · 保留彼此的生活費');
+  else text = '⌑ A 可分攤 '+pct(lo)+'% – '+pct(hi)+'%'+(base.adjusted?' · 已依保留金額底線限制比例':' · 保障彼此的保留金額');
   $('constraint').textContent=text; $('constraint').classList.toggle('error',!base.feasible);
   const sum = state.incomes[0]+state.incomes[1]-total;
   compared($('houseRemaining'),sum,raised[0]+raised[1]-total);
@@ -95,13 +95,13 @@ function render() {
   $('scenarioMode').disabled=!state.simulate;
   $('scenarioNote').classList.toggle('error',state.simulate&&!future.feasible);
   const modeLabel = {income:'依新收入重算',fixed:'維持原分攤比例',retain:'加薪保留比例'}[state.mode];
-  $('scenarioNote').textContent = !state.simulate ? '開啟加薪模擬，數字將以「原金額 ＋／− 差額」呈現；加薪不會覆蓋原始收入。' : future.reason === 'no_baseline' ? '原始計畫無可行分配，無法計算加薪保留基準。請先調整原始收入、支出或最低生活費；也可切換其他模擬模式。' : !future.feasible ? '加薪後仍無法分攤：'+problem(future) : '加薪後分攤 '+pct(future.ratio)+'% / '+pct(100-future.ratio)+'%（'+modeLabel+'）'+(retaining ? '。先保障原結餘＋約定加薪，再依新收入分配；實際保留可更多。' : (future.adjusted?'，已依最低生活費調整。':'。')+'上方拖桿調整原始計畫；加薪結果以差額呈現。');
+  $('scenarioNote').textContent = !state.simulate ? '開啟加薪模擬，數字將以「原金額 ＋／− 差額」呈現；加薪不會覆蓋原始收入。' : future.reason === 'no_baseline' ? '原始計畫無可行分配，無法計算加薪保留基準。請先調整原始收入、支出或個人最低保留金額；也可切換其他模擬模式。' : !future.feasible ? '加薪後仍無法分攤：'+problem(future) : '加薪後分攤 '+pct(future.ratio)+'% / '+pct(100-future.ratio)+'%（'+modeLabel+'）'+(retaining ? '。先保障原結餘＋約定加薪，再依新收入分配；實際保留可更多。' : (future.adjusted?'，已依個人最低保留金額調整。':'。')+'上方拖桿調整原始計畫；加薪結果以差額呈現。');
   save();
 }
 function problem(result) {
-  const parts = result.minimumShortfall.map((v,i)=>v ? (state.names[i] || (i?'B':'A'))+' 收入低於生活費 '+fmt(v)+' 元' : '').filter(Boolean);
+  const parts = result.minimumShortfall.map((v,i)=>v ? (state.names[i] || (i?'B':'A'))+' 收入低於最低保留金額 '+fmt(v)+' 元' : '').filter(Boolean);
   if(result.shortfall) parts.push('家庭支出尚缺 '+fmt(result.shortfall)+' 元');
-  return parts.join('；')+'。請調整收入、支出或最低生活費。';
+  return parts.join('；')+'。請調整收入、支出或個人最低保留金額。';
 }
 function setRatio(value) {
   if (!base.feasible) return;
