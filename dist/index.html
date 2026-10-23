@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="zh-Hant">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f7f8f4"><meta name="description" content="一起找到舒服的家庭分攤方式：雙人收入、個人最低保留金額與加薪模擬。"><title>一起生活 Together — 家庭分攤計畫</title><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%23385e50'/%3E%3Cpath d='M11 20L20 11L29 20V30H11Z' stroke='white' fill='none' stroke-width='2'/%3E%3C/svg%3E"><link rel="stylesheet" href="style.css"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f7f8f4"><meta name="description" content="一起找到舒服的家庭分攤方式：雙人收入、個人最低保留金額與加薪模擬。"><title>一起有餘 Shared Balance — 家庭分攤計畫</title><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%23385e50'/%3E%3Cpath d='M11 20L20 11L29 20V30H11Z' stroke='white' fill='none' stroke-width='2'/%3E%3C/svg%3E"><link rel="stylesheet" href="style.css"></head>
 <body>
 <div class="app">
-<header><a class="brand" href="./"><span class="brand-icon">⌂</span><span>一起生活 <small>TOGETHER</small></span></a><div class="header-actions"><span id="saveState">僅儲存在此瀏覽器</span><button id="reset" class="quiet">重設範例 ↺</button></div></header>
+<header><a class="brand" href="./"><span class="brand-icon">⌂</span><span>一起有餘 <small>SHARED BALANCE</small></span></a><div class="header-actions"><span id="saveState">僅儲存在此瀏覽器</span><button id="exportSettings" class="quiet" title="下載完整設定（JSON），包含收入、支出明細與加薪模擬">匯出設定 ↓</button><button id="reset" class="quiet">重設範例 ↺</button></div></header>
 <section class="intro"><div><p class="eyebrow">A LITTLE BALANCE, A BETTER LIFE</p><h1>兩個人的生活，<span>一起好好分配。</span></h1><p>把收入、日常與未來放在一起，找到彼此都舒服的比例。</p></div><div class="period"><span class="live-dot"></span> 每月規劃 <span>／ NT$</span></div></section>
 <main class="workspace">
 <section class="person person-a" aria-label="A 的財務"><div class="person-heading"><span class="avatar">A</span><div><input id="name0" class="name" aria-label="A 的名字" maxlength="16"><small>我們的一份力量</small></div><span class="person-tag">PARTNER 01</span></div>
@@ -22,7 +22,7 @@
 </main>
 <section class="scenario"><div class="scenario-title"><span class="spark">✧</span><div><h2>讓未來，多一點可能</h2><p>試試加薪後，生活會有什麼不一樣。</p></div></div><label class="toggle-label"><input id="simulate" type="checkbox" role="switch"><span>加薪模擬</span></label><select id="scenarioMode" aria-label="加薪後分配方式"><option value="income">依新收入重算比例</option><option value="fixed">維持原分攤比例</option><option value="retain">加薪保留比例</option></select><div class="scenario-result"><span>每月多出的餘裕</span><strong id="extraTotal">＋0 <small>元</small></strong></div></section>
 <div class="notice" id="scenarioNote" aria-live="polite"></div>
-<footer><span>生活沒有標準答案，適合你們的，就是好比例。</span><span>以整數元計算 · 資料保存在這台裝置</span></footer>
+<div id="exportStatus" role="status" class="export-status"></div><footer><span>生活沒有標準答案，適合你們的，就是好比例。</span><span>以整數元計算 · 資料保存在這台裝置</span></footer>
 </div>
 <dialog id="itemsDialog"><div class="dialog-head"><div><p class="eyebrow">THE EVERYDAY DETAILS</p><h2>生活，由這些小事組成</h2><p>管理每月支出，總額會即時帶回分攤。</p></div><button id="closeItems" class="close" aria-label="關閉支出明細">×</button></div><div class="list-heading"><span>項目名稱</span><span>每月金額（NT$）</span></div><div id="itemsList" class="items-list"></div><button id="addItem" class="add-item">＋ 新增支出項目</button><div class="dialog-total"><span>每月家庭支出</span><strong id="dialogTotal"></strong></div><button id="doneItems" class="primary">完成，回到我們的計畫 →</button></dialog>
 <script src="model.js"></script><script src="app.js"></script>

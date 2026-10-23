@@ -1,6 +1,7 @@
 const $ = id => document.getElementById(id);
 const defaults = () => ({ names: ['夥伴 A', '夥伴 B'], incomes: [60000, 45000], raises: [5000, 3000], minimums: [20000, 20000], enabled: [true, true], ratio: null, simulate: false, mode: 'income', retention: [40,40], items: [{name:'房租 / 房貸',amount:18000},{name:'日常伙食',amount:10000},{name:'水電瓦斯',amount:2500},{name:'網路與通訊',amount:1500},{name:'生活用品',amount:3000}] });
 const KEY = 'together-budget-v1';
+// Preserve the existing storage key so a product rename keeps saved settings.
 let state = defaults(), storageAvailable = true;
 try {
   const s = JSON.parse(localStorage.getItem(KEY));
@@ -138,4 +139,38 @@ $('openItems').addEventListener('click',()=>{renderItems();$('itemsDialog').show
 ['closeItems','doneItems'].forEach(id=>$(id).addEventListener('click',()=>$('itemsDialog').close()));
 $('addItem').addEventListener('click',()=>{state.items.push({name:'',amount:0});renderItems();render();$('itemsList').lastElementChild.firstElementChild.focus()});
 $('reset').addEventListener('click',()=>{if(confirm('將清除這台裝置上的目前設定，還原範例。確定重設？')){state=defaults();syncInputs();render()}});
+$('exportSettings').addEventListener('click',()=>{
+  let url;
+  let link;
+  try {
+    const now = new Date();
+    const data = {
+      app: 'shared-balance',
+      schemaVersion: 1,
+      exportedAt: now.toISOString(),
+      currency: 'TWD',
+      period: 'monthly',
+      settings: {
+        names: [...state.names], incomes: [...state.incomes],
+        raises: [...state.raises], minimums: [...state.minimums],
+        enabled: [...state.enabled], ratio: state.ratio,
+        simulate: state.simulate, mode: state.mode,
+        retention: [...state.retention],
+        items: state.items.map(({name,amount})=>({name,amount}))
+      }
+    };
+    const pad = n => String(n).padStart(2,'0');
+    const stamp = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+'_'+pad(now.getHours())+pad(now.getMinutes())+pad(now.getSeconds());
+    url = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)+'\n'],{type:'application/json;charset=utf-8'}));
+    link = document.createElement('a'); link.href = url;
+    link.download = 'shared-balance-settings_'+stamp+'.json';
+    document.body.append(link); link.click();
+    $('exportStatus').textContent = '已產生 JSON 設定檔，請查看下載紀錄。';
+  } catch {
+    $('exportStatus').textContent = '無法匯出設定，請重新嘗試。';
+  } finally {
+    link?.remove();
+    if(url) setTimeout(()=>URL.revokeObjectURL(url),10000);
+  }
+});
 syncInputs();render();

@@ -1,4 +1,4 @@
-# 一起生活 Together
+# 一起有餘 Shared Balance
 
 純前端家庭分攤試算器。直接開啟 `dist/index.html`，或在此目錄執行 `python -m http.server 4173 --directory dist` 後開啟 http://localhost:4173。
 
@@ -12,3 +12,8 @@
 - 主滑桿始終調整原始計畫，加薪結果以差額及對比比例呈現；「依收入分配」會持續跟隨收入，手動拖動後改為自訂比例。
 
 驗證：`node model.test.cjs`。計算模型與畫面分離，測試涵蓋分攤加總、個人最低保留金額、零收入與不可行條件。
+
+
+匯出設定：右上角「匯出設定」下載 UTF-8 JSON，包含 schemaVersion、exportedAt（UTC）、currency（TWD）、period（monthly）與完整 settings。包含姓名、收入、最低保留金額及啟用狀態、原始分攤設定（ratio=null 表示跟隨收入）、支出明細、加薪與模擬設定。檔名使用本機時間。只匯出設定，不匯出推導結果；目前尚未提供匯入介面。檔案由瀏覽器直接產生，不傳送到伺服器。
+
+專案根目錄：C:\91APP\shared-balance。為保留既有資料，沿用 localStorage 的 together-budget-v1 鍵與原線上網址。
