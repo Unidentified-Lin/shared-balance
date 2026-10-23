@@ -173,4 +173,44 @@ $('exportSettings').addEventListener('click',()=>{
     if(url) setTimeout(()=>URL.revokeObjectURL(url),10000);
   }
 });
+let pendingImport = null;
+$('importSettings').addEventListener('click',()=>{
+  $('importFile').value = '';
+  $('importFile').click();
+});
+$('importFile').addEventListener('change',async e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  pendingImport = null;
+  $('importSettings').disabled = true;
+  try {
+    if(file.size > 5 * 1024 * 1024) throw new Error('設定檔超過 5 MB，請選擇較小的 JSON 設定檔。');
+    const candidate = Settings.parse(await file.text());
+    pendingImport = candidate;
+    $('importSummary').textContent = (candidate.names[0]||'A')+' / '+(candidate.names[1]||'B')+' · '+candidate.items.length+' 筆支出 · 每月合計 NT$ '+fmt(candidate.items.reduce((sum,x)=>sum+x.amount,0));
+    $('importError').textContent = '';
+    $('importDialog').showModal();
+  } catch(error) {
+    $('exportStatus').textContent = '匯入失敗：'+error.message+' 目前設定未變更。';
+  } finally {
+    $('importSettings').disabled = false;
+    e.target.value = '';
+  }
+});
+$('cancelImport').addEventListener('click',()=>$('importDialog').close());
+$('importDialog').addEventListener('close',()=>{pendingImport=null;});
+$('confirmImport').addEventListener('click',()=>{
+  if(!pendingImport) return;
+  try {
+    // Persist first: failed storage must not partially replace the current plan.
+    localStorage.setItem(KEY,JSON.stringify(pendingImport));
+  } catch {
+    $('importError').textContent = '瀏覽器無法儲存設定。請確認儲存空間與瀏覽器權限後重試；目前設定未變更。';
+    return;
+  }
+  state = pendingImport; storageAvailable = true;
+  syncInputs(); render();
+  $('importDialog').close();
+  $('exportStatus').textContent = '設定已匯入並儲存於此裝置。';
+});
 syncInputs();render();

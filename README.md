@@ -14,6 +14,6 @@
 驗證：`node model.test.cjs`。計算模型與畫面分離，測試涵蓋分攤加總、個人最低保留金額、零收入與不可行條件。
 
 
-匯出設定：右上角「匯出設定」下載 UTF-8 JSON，包含 schemaVersion、exportedAt（UTC）、currency（TWD）、period（monthly）與完整 settings。包含姓名、收入、最低保留金額及啟用狀態、原始分攤設定（ratio=null 表示跟隨收入）、支出明細、加薪與模擬設定。檔名使用本機時間。只匯出設定，不匯出推導結果；目前尚未提供匯入介面。檔案由瀏覽器直接產生，不傳送到伺服器。
+匯出設定：右上角「匯出設定」下載 UTF-8 JSON，包含 schemaVersion、exportedAt（UTC）、currency（TWD）、period（monthly）與完整 settings。包含姓名、收入、最低保留金額及啟用狀態、原始分攤設定（ratio=null 表示跟隨收入）、支出明細、加薪與模擬設定。檔名使用本機時間。只匯出設定，不匯出推導結果；可使用「匯入設定」還原至其他裝置：選擇 JSON（最大 5 MB），檢視摘要並確認取代。驗證格式版本、所有欄位型別與金額範圍；錯誤、取消或無法儲存時維持目前設定。匯入取代所有設定，不合併支出項目。檔案由瀏覽器直接產生，不傳送到伺服器。
 
 專案根目錄：C:\91APP\shared-balance。為保留既有資料，沿用 localStorage 的 together-budget-v1 鍵與原線上網址。
