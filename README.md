@@ -1,6 +1,28 @@
 # 一起有餘 Shared Balance
 
-純前端家庭分攤試算器。直接開啟 `dist/index.html`，或在此目錄執行 `python -m http.server 4173 --directory dist` 後開啟 http://localhost:4173。
+純前端家庭分攤試算器，可直接開啟網頁，也可透過 npm 啟動本機網站，不需要 Python。
+
+## 本機使用
+
+### 方式一：直接開啟
+
+使用瀏覽器開啟 `dist/index.html` 即可，不需要安裝 Node.js 或執行任何指令。
+
+### 方式二：使用 npm
+
+安裝 Node.js（含 npm），在專案根目錄執行：
+
+```sh
+npm start
+```
+
+開啟 http://localhost:4173，按 `Ctrl+C` 停止服務。沒有套件依賴，不需要先執行 `npm install`。伺服器僅供本機使用，提供 `dist/` 內的靜態檔案。
+
+若連接埠被占用，可在 PowerShell 使用 `$env:PORT=4174` 後執行 `npm start`。
+
+直接開啟檔案與使用 localhost 的瀏覽器儲存空間不同，切換方式時可透過「匯出設定／匯入設定」搬移資料；部分瀏覽器會限制本機檔案的儲存功能，此時請使用 npm 方式。
+
+## 功能
 
 - A、B 月收入與個人最低保留金額，分攤比例滑桿與百分比輸入。
 - 支出明細集中於對話框，長清單獨立捲動。
@@ -29,6 +51,7 @@ dist/                 手寫的網站原始碼，同時也是直接部署目錄
   settings.js         匯入設定的驗證
 model.test.cjs        計算模型測試
 settings.test.cjs     設定驗證測試
+scripts/serve.cjs     npm start 使用的本機靜態伺服器
 .openai/hosting.json  既有 ChatGPT Sites 的部署識別與設定
 ```
 

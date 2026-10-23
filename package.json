@@ -4,6 +4,7 @@
   "private": true,
   "description": "一起有餘：雙人家庭分攤與加薪模擬工具",
   "scripts": {
+    "start": "node scripts/serve.cjs",
     "test": "node model.test.cjs && node settings.test.cjs"
   }
 }
